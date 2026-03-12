@@ -7,7 +7,7 @@ Uses whichever model is currently selected in your session -- no extra API keys 
 ## Install
 
 ```bash
-pi install npm:pi-prompt-enhancer
+pi install npm:@danchamorro/pi-prompt-enhancer
 ```
 
 ## Usage

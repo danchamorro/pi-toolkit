@@ -1,5 +1,5 @@
 {
-  "name": "pi-prompt-enhancer",
+  "name": "@danchamorro/pi-prompt-enhancer",
   "version": "1.0.0",
   "description": "Enhance prompts to be clearer, more specific, and more actionable before sending",
   "keywords": ["pi-package"],
