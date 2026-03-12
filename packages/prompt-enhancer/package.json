@@ -11,6 +11,7 @@
     "directory": "packages/prompt-enhancer"
   },
   "type": "module",
+  "files": ["index.ts", "clean.ts"],
   "pi": {
     "extensions": ["./index.ts"]
   },

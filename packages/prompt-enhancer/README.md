@@ -1,6 +1,6 @@
 # pi-prompt-enhancer
 
-A [Pi](https://github.com/nicholasgasior/pi-coding-agent) extension that rewrites your prompts to be clearer, more specific, and more actionable before sending them to the agent.
+A [Pi](https://github.com/badlogic/pi-mono) extension that rewrites your prompts to be clearer, more specific, and more actionable before sending them to the agent.
 
 Uses whichever model is currently selected in your session -- no extra API keys or configuration needed.
 
@@ -54,7 +54,7 @@ Enhances the given prompt and places the result in the editor for review.
 
 ## Requirements
 
-- [Pi](https://github.com/nicholasgasior/pi-coding-agent) coding agent
+- [Pi](https://github.com/badlogic/pi-mono) coding agent
 - Any model with an active API key selected in the session
 
 ## License

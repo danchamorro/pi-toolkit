@@ -1,6 +1,6 @@
 # pi-toolkit
 
-A collection of extensions and tools for the [Pi](https://github.com/nicholasgasior/pi-coding-agent) coding agent.
+A collection of extensions and tools for the [Pi](https://github.com/badlogic/pi-mono) coding agent.
 
 ## Packages
 

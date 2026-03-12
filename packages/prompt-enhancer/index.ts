@@ -15,6 +15,7 @@
 
 import { complete } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { clean } from "./clean.ts";
 
 // ---------------------------------------------------------------------------
 // System prompt for the enhancer model
@@ -44,15 +45,6 @@ const ENHANCER_SYSTEM = [
 	"- If the prompt is already clear and specific, return it with minimal or no changes.",
 	"- Output ONLY the enhanced prompt. No preamble, no explanation, no wrapping, no quotes.",
 ].join("\n");
-
-// ---------------------------------------------------------------------------
-// Output cleaning (strip accidental code fences and surrounding quotes)
-// ---------------------------------------------------------------------------
-
-function clean(text: string): string {
-	const stripped = text.replace(/^```\w*\n?|```$/g, "").trim();
-	return stripped.replace(/^(['"])([\s\S]*)\1$/, "$2").trim();
-}
 
 // ---------------------------------------------------------------------------
 // Enhancement (uses the currently selected model, no thinking)
