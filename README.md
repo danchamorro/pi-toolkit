@@ -6,6 +6,7 @@ A collection of extensions and tools for the [Pi](https://github.com/badlogic/pi
 
 | Package | Description | npm |
 |---|---|---|
+| [agent-modes](packages/agent-modes) | Switch between code, architect, debug, ask, and review modes with enforced tool and bash restrictions | [![npm](https://img.shields.io/npm/v/@danchamorro/pi-agent-modes)](https://www.npmjs.com/package/@danchamorro/pi-agent-modes) |
 | [prompt-enhancer](packages/prompt-enhancer) | Rewrite prompts to be clearer and more actionable before sending | [![npm](https://img.shields.io/npm/v/@danchamorro/pi-prompt-enhancer)](https://www.npmjs.com/package/@danchamorro/pi-prompt-enhancer) |
 
 ## Install
