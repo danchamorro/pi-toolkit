@@ -34,7 +34,7 @@ import { MODE_NAMES, isSafeBash, isEditableFile, type ModeDefinition, type ModeN
 
 export default function agentModes(pi: ExtensionAPI) {
 	let modes: Record<ModeName, ModeDefinition>;
-	let activeMode: ModeName = "code";
+	let activeMode: ModeName | "off" = "code";
 
 	// ------------------------------------------------------------------
 	// CLI flag
@@ -49,7 +49,8 @@ export default function agentModes(pi: ExtensionAPI) {
 	// Helpers
 	// ------------------------------------------------------------------
 
-	function getMode(): ModeDefinition {
+	function getMode(): ModeDefinition | undefined {
+		if (activeMode === "off") return undefined;
 		return modes[activeMode];
 	}
 
@@ -62,9 +63,15 @@ export default function agentModes(pi: ExtensionAPI) {
 		return mode.tools.filter((t) => allNames.has(t));
 	}
 
+	function turnOff(ctx: ExtensionContext): void {
+		activeMode = "off";
+		pi.setActiveTools(pi.getAllTools().map((t) => t.name));
+		updateStatus(ctx);
+	}
+
 	async function applyMode(name: ModeName, ctx: ExtensionContext): Promise<void> {
 		activeMode = name;
-		const mode = getMode();
+		const mode = getMode()!;
 
 		// Set active tools
 		pi.setActiveTools(resolveTools(mode));
@@ -91,10 +98,10 @@ export default function agentModes(pi: ExtensionAPI) {
 	}
 
 	function updateStatus(ctx: ExtensionContext) {
-		const mode = getMode();
-		if (activeMode === "code") {
+		if (activeMode === "off" || activeMode === "code") {
 			ctx.ui.setStatus("agent-mode", undefined);
 		} else {
+			const mode = getMode()!;
 			ctx.ui.setStatus("agent-mode", ctx.ui.theme.fg("accent", `mode:${mode.name.toLowerCase()}`));
 		}
 	}
@@ -104,16 +111,23 @@ export default function agentModes(pi: ExtensionAPI) {
 	// ------------------------------------------------------------------
 
 	async function showModeSelector(ctx: ExtensionContext): Promise<void> {
-		const items: SelectItem[] = MODE_NAMES.map((name) => {
-			const mode = modes[name];
-			const isActive = name === activeMode;
-			const toolSummary = mode.tools === "all" ? "all tools" : mode.tools.join(", ");
-			return {
-				value: name,
-				label: isActive ? `${mode.name} (active)` : mode.name,
-				description: toolSummary,
-			};
-		});
+		const items: SelectItem[] = [
+			...MODE_NAMES.map((name) => {
+				const mode = modes[name];
+				const isActive = name === activeMode;
+				const toolSummary = mode.tools === "all" ? "all tools" : mode.tools.join(", ");
+				return {
+					value: name,
+					label: isActive ? `${mode.name} (active)` : mode.name,
+					description: toolSummary,
+				};
+			}),
+			{
+				value: "off",
+				label: activeMode === "off" ? "Off (active)" : "Off",
+				description: "Disable agent modes, restore default PI behavior",
+			},
+		];
 
 		const result = await ctx.ui.custom<string | null>((tui, theme, _kb, done) => {
 			const container = new Container();
@@ -151,6 +165,13 @@ export default function agentModes(pi: ExtensionAPI) {
 
 		if (!result) return;
 
+		if (result === "off") {
+			turnOff(ctx);
+			ctx.ui.notify("Agent modes disabled", "info");
+			persistState();
+			return;
+		}
+
 		const name = result as ModeName;
 		await applyMode(name, ctx);
 		ctx.ui.notify(`Switched to ${modes[name].name} mode`, "info");
@@ -162,12 +183,18 @@ export default function agentModes(pi: ExtensionAPI) {
 	// ------------------------------------------------------------------
 
 	async function cycleMode(ctx: ExtensionContext): Promise<void> {
-		const currentIdx = MODE_NAMES.indexOf(activeMode);
-		const nextIdx = (currentIdx + 1) % MODE_NAMES.length;
-		const nextName = MODE_NAMES[nextIdx];
+		const cycle: (ModeName | "off")[] = [...MODE_NAMES, "off"];
+		const currentIdx = cycle.indexOf(activeMode);
+		const nextIdx = (currentIdx + 1) % cycle.length;
+		const next = cycle[nextIdx];
 
-		await applyMode(nextName, ctx);
-		ctx.ui.notify(`Switched to ${modes[nextName].name} mode`, "info");
+		if (next === "off") {
+			turnOff(ctx);
+			ctx.ui.notify("Agent modes disabled", "info");
+		} else {
+			await applyMode(next, ctx);
+			ctx.ui.notify(`Switched to ${modes[next].name} mode`, "info");
+		}
 		persistState();
 	}
 
@@ -305,6 +332,7 @@ export default function agentModes(pi: ExtensionAPI) {
 					value: name,
 					label: modes[name].name,
 				})),
+				{ value: "off", label: "Off" },
 				{ value: "setup", label: "Setup" },
 			];
 			const filtered = items.filter((i) => i.value.startsWith(prefix));
@@ -318,11 +346,18 @@ export default function agentModes(pi: ExtensionAPI) {
 				return;
 			}
 
+			if (arg === "off") {
+				turnOff(ctx);
+				ctx.ui.notify("Agent modes disabled", "info");
+				persistState();
+				return;
+			}
+
 			if (arg) {
 				const name = arg as ModeName;
 				if (!MODE_NAMES.includes(name)) {
 					ctx.ui.notify(
-						`Unknown mode "${args!.trim()}". Available: ${MODE_NAMES.join(", ")}, setup`,
+						`Unknown mode "${args!.trim()}". Available: ${MODE_NAMES.join(", ")}, off, setup`,
 						"error",
 					);
 					return;
@@ -353,7 +388,7 @@ export default function agentModes(pi: ExtensionAPI) {
 
 	pi.on("before_agent_start", async (event) => {
 		const mode = getMode();
-		if (!mode.prompt) return;
+		if (!mode || !mode.prompt) return;
 
 		return {
 			systemPrompt: `${event.systemPrompt}\n\n${mode.prompt}`,
@@ -366,6 +401,7 @@ export default function agentModes(pi: ExtensionAPI) {
 
 	pi.on("tool_call", async (event) => {
 		const mode = getMode();
+		if (!mode) return;
 
 		// Bash restrictions
 		if (isToolCallEventType("bash", event)) {
@@ -441,7 +477,9 @@ export default function agentModes(pi: ExtensionAPI) {
 			)
 			.pop() as { data?: { mode: ModeName } } | undefined;
 
-		if (stateEntry?.data?.mode && MODE_NAMES.includes(stateEntry.data.mode)) {
+		if (stateEntry?.data?.mode === "off") {
+			turnOff(ctx);
+		} else if (stateEntry?.data?.mode && MODE_NAMES.includes(stateEntry.data.mode)) {
 			await applyMode(stateEntry.data.mode, ctx);
 		} else {
 			updateStatus(ctx);
