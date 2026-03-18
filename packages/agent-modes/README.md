@@ -1,16 +1,18 @@
 # @danchamorro/pi-agent-modes
 
-Agent modes for [pi](https://github.com/badlogic/pi-mono) -- switch between focused operational modes with enforced tool restrictions.
+Agent modes for [pi](https://github.com/badlogic/pi-mono) -- switch between focused operational modes with enforced tool restrictions and distinct behavioral prompts.
 
 ## Modes
 
 | Mode | Tools | Bash | Edits | Purpose |
 |------|-------|------|-------|---------|
-| **Code** | All | Unrestricted | All files | Default. Full access, no restrictions. |
-| **Architect** | read, bash, edit, write, grep, find, ls | Read-only allowlist | `.md`, `.mdx` only | Analysis and planning. |
-| **Debug** | All | Unrestricted | All files | Systematic diagnosis with guided behavior. |
-| **Ask** | read, grep, find, ls | None | None | Read-only Q&A. |
+| **Code** | All | Unrestricted | All files | Default. Write, modify, or refactor code. |
+| **Architect** | read, bash, edit, write, grep, find, ls | Read-only allowlist | `.md`, `.mdx` only | Plan, design, and strategize before implementation. |
+| **Debug** | All | Unrestricted | All files | Systematic problem diagnosis and resolution. |
+| **Ask** | read, grep, find, ls | None | None | Read-only Q&A -- explanations and documentation. |
 | **Review** | read, bash, grep, find, ls | Review-safe allowlist | None | Code review with structured feedback. |
+
+Each mode has a distinct PI persona and mode-specific custom instructions that guide the agent's behavior.
 
 ## Install
 
@@ -32,8 +34,12 @@ Or add to `~/.pi/agent/settings.json`:
 
 ```
 /agent-mode              Show mode selector
+/agent-mode code         Switch to code mode
 /agent-mode architect    Switch to architect mode
-/agent-mode code         Switch back to code mode
+/agent-mode debug        Switch to debug mode
+/agent-mode ask          Switch to ask mode
+/agent-mode review       Switch to review mode
+/agent-mode setup        Assign models and thinking levels per mode
 ```
 
 **Keyboard shortcut:**
@@ -48,10 +54,24 @@ pi --agent-mode architect
 
 ## How enforcement works
 
-- **Tool visibility:** `setActiveTools()` controls which tools the model can see. In ask mode, bash/edit/write simply don't exist.
-- **Bash restrictions:** For architect and review modes, bash commands are validated against an allowlist at the `tool_call` level. Destructive commands are blocked before execution.
-- **File restrictions:** In architect mode, edit and write are restricted to markdown files (`.md`, `.mdx`). Other file types are blocked at the `tool_call` level.
-- **Prompt injection:** Each mode (except code) appends a short behavioral prompt to the system prompt via `before_agent_start`.
+Enforcement is three-layered, not just prompt guidance:
+
+1. **Tool visibility:** `setActiveTools()` controls which tools the model can see. In ask mode, bash/edit/write don't exist for the model.
+2. **Bash restrictions:** For architect and review modes, bash commands are validated against an allowlist at the `tool_call` level. Destructive commands (rm, git push, npm install, etc.) are blocked before execution. Piped and chained commands are also checked.
+3. **File restrictions:** In architect mode, edit and write are restricted to markdown files (`.md`, `.mdx`). Other file types are blocked at the `tool_call` level.
+4. **Prompt injection:** Each mode appends a behavioral prompt to the system prompt via `before_agent_start`, setting the agent's persona and custom instructions.
+
+## Model setup
+
+By default, all modes use whatever model is active in your session. To assign specific models and thinking levels per mode, run:
+
+```
+/agent-mode setup
+```
+
+This walks through each mode, letting you pick a model and thinking level from your available models. Pressing Escape at any point cancels the setup. The configuration is saved to `~/.pi/agent/agent-modes.json`.
+
+You can re-run setup at any time to change assignments. Selecting "No override" for a mode clears any previous assignment.
 
 ## Configuration
 

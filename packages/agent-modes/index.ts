@@ -7,6 +7,7 @@
  * Commands:
  *   /agent-mode <name>     Switch to a specific mode
  *   /agent-mode            Show mode selector
+ *   /agent-mode setup      Assign models and thinking levels per mode
  *
  * Shortcuts:
  *   Ctrl+Shift+M           Cycle through modes
@@ -19,10 +20,12 @@
  *   .pi/agent-modes.json           Project overrides
  */
 
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { join, dirname } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { DynamicBorder, isToolCallEventType } from "@mariozechner/pi-coding-agent";
+import { DynamicBorder, getAgentDir, isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Container, Key, type SelectItem, SelectList, Text } from "@mariozechner/pi-tui";
-import { loadModes } from "./config.ts";
+import { loadModes, type ModesConfig } from "./config.ts";
 import { MODE_NAMES, isSafeBash, isEditableFile, type ModeDefinition, type ModeName } from "./modes.ts";
 
 // ---------------------------------------------------------------------------
@@ -177,25 +180,149 @@ export default function agentModes(pi: ExtensionAPI) {
 	}
 
 	// ------------------------------------------------------------------
-	// Command: /agent-mode [name]
+	// Setup wizard
+	// ------------------------------------------------------------------
+
+	const NO_OVERRIDE_MODEL = "No override (use session model)";
+	const NO_OVERRIDE_THINKING = "No override (use session level)";
+	const THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh"] as const;
+
+	async function runSetup(ctx: ExtensionContext): Promise<void> {
+		const available = ctx.modelRegistry.getAvailable();
+		if (available.length === 0) {
+			ctx.ui.notify("No models available. Configure API keys first.", "error");
+			return;
+		}
+
+		// Build model options: "Name (provider/id)"
+		const modelOptions = [
+			NO_OVERRIDE_MODEL,
+			...available.map((m) => `${m.name ?? m.id} (${m.provider}/${m.id})`),
+		];
+
+		const thinkingOptions = [NO_OVERRIDE_THINKING, ...THINKING_LEVELS];
+		const config: ModesConfig = {};
+
+		for (const name of MODE_NAMES) {
+			const mode = modes[name];
+
+			// Current assignment (if any)
+			const current = mode.provider && mode.model
+				? `Current: ${mode.provider}/${mode.model}`
+				: "Current: session default";
+
+			const modelChoice = await ctx.ui.select(
+				`${mode.name} mode -- select model (${current}):`,
+				modelOptions,
+			);
+
+			if (modelChoice === undefined) {
+				ctx.ui.notify("Setup cancelled", "info");
+				return;
+			}
+
+			if (modelChoice !== NO_OVERRIDE_MODEL) {
+				// Parse "Name (provider/id)" -> provider, id
+				const match = modelChoice.match(/\(([^/]+)\/(.+)\)$/);
+				if (match) {
+					if (!config[name]) config[name] = {};
+					config[name]!.provider = match[1];
+					config[name]!.model = match[2];
+				}
+			}
+
+			const currentThinking = mode.thinkingLevel
+				? `Current: ${mode.thinkingLevel}`
+				: "Current: session default";
+
+			const thinkingChoice = await ctx.ui.select(
+				`${mode.name} mode -- select thinking level (${currentThinking}):`,
+				thinkingOptions,
+			);
+
+			if (thinkingChoice === undefined) {
+				ctx.ui.notify("Setup cancelled", "info");
+				return;
+			}
+
+			if (thinkingChoice !== NO_OVERRIDE_THINKING) {
+				if (!config[name]) config[name] = {};
+				config[name]!.thinkingLevel = thinkingChoice as typeof THINKING_LEVELS[number];
+			}
+		}
+
+		// Load existing config and merge
+		const configPath = join(getAgentDir(), "agent-modes.json");
+		let existing: ModesConfig = {};
+		if (existsSync(configPath)) {
+			try {
+				existing = JSON.parse(readFileSync(configPath, "utf-8"));
+			} catch {}
+		}
+
+		for (const name of MODE_NAMES) {
+			if (config[name]) {
+				existing[name] = { ...existing[name], ...config[name] };
+			} else if (existing[name]) {
+				// "No override" selected -- clear model/thinking assignments
+				delete existing[name]!.provider;
+				delete existing[name]!.model;
+				delete existing[name]!.thinkingLevel;
+				if (Object.keys(existing[name]!).length === 0) {
+					delete existing[name];
+				}
+			}
+		}
+
+		// Save
+		const dir = dirname(configPath);
+		if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+		writeFileSync(configPath, JSON.stringify(existing, null, 2) + "\n");
+
+		// Reload
+		modes = loadModes(ctx.cwd);
+
+		// Summary
+		const summary = MODE_NAMES.map((name) => {
+			const m = modes[name];
+			const model = m.provider && m.model ? `${m.provider}/${m.model}` : "session default";
+			const thinking = m.thinkingLevel ?? "session default";
+			return `  ${m.name}: ${model} (thinking: ${thinking})`;
+		}).join("\n");
+
+		ctx.ui.notify(`Setup saved to ~/.pi/agent/agent-modes.json\n\n${summary}`, "info");
+	}
+
+	// ------------------------------------------------------------------
+	// Command: /agent-mode [name|setup]
 	// ------------------------------------------------------------------
 
 	pi.registerCommand("agent-mode", {
-		description: "Switch agent mode (code, architect, debug, ask, review)",
+		description: "Switch agent mode (code, architect, debug, ask, review) or run setup",
 		getArgumentCompletions: (prefix: string) => {
-			const items = MODE_NAMES.map((name) => ({
-				value: name,
-				label: modes[name].name,
-			}));
+			const items = [
+				...MODE_NAMES.map((name) => ({
+					value: name,
+					label: modes[name].name,
+				})),
+				{ value: "setup", label: "Setup" },
+			];
 			const filtered = items.filter((i) => i.value.startsWith(prefix));
 			return filtered.length > 0 ? filtered : null;
 		},
 		handler: async (args, ctx) => {
-			if (args?.trim()) {
-				const name = args.trim().toLowerCase() as ModeName;
+			const arg = args?.trim().toLowerCase();
+
+			if (arg === "setup") {
+				await runSetup(ctx);
+				return;
+			}
+
+			if (arg) {
+				const name = arg as ModeName;
 				if (!MODE_NAMES.includes(name)) {
 					ctx.ui.notify(
-						`Unknown mode "${args.trim()}". Available: ${MODE_NAMES.join(", ")}`,
+						`Unknown mode "${args!.trim()}". Available: ${MODE_NAMES.join(", ")}, setup`,
 						"error",
 					);
 					return;
