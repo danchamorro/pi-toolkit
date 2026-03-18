@@ -54,13 +54,25 @@ export default function agentModes(pi: ExtensionAPI) {
 		return modes[activeMode];
 	}
 
+	// Built-in tool names -- these are the only ones modes restrict
+	const BUILTIN_TOOLS = new Set(["read", "bash", "edit", "write", "grep", "find", "ls"]);
+
 	function resolveTools(mode: ModeDefinition): string[] {
+		const allTools = pi.getAllTools().map((t) => t.name);
 		if (mode.tools === "all") {
-			return pi.getAllTools().map((t) => t.name);
+			return allTools;
 		}
-		// Filter to only tools that actually exist
-		const allNames = new Set(pi.getAllTools().map((t) => t.name));
-		return mode.tools.filter((t) => allNames.has(t));
+		// Start with the mode's explicit tool list (filtered to existing)
+		const allNames = new Set(allTools);
+		const result = new Set(mode.tools.filter((t) => allNames.has(t)));
+		// Include all extension/MCP tools -- mode restrictions only apply
+		// to built-in tools, not third-party information-gathering tools
+		for (const tool of allTools) {
+			if (!BUILTIN_TOOLS.has(tool)) {
+				result.add(tool);
+			}
+		}
+		return [...result];
 	}
 
 	function turnOff(ctx: ExtensionContext): void {
