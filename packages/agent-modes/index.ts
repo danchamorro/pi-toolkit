@@ -110,12 +110,50 @@ export default function agentModes(pi: ExtensionAPI) {
 	}
 
 	function updateStatus(ctx: ExtensionContext) {
-		if (activeMode === "off" || activeMode === "code") {
-			ctx.ui.setStatus("agent-mode", undefined);
+		if (activeMode === "off") {
+			ctx.ui.setWidget("agent-mode-card", undefined);
 		} else {
-			const mode = getMode()!;
-			ctx.ui.setStatus("agent-mode", ctx.ui.theme.fg("accent", `mode:${mode.name.toLowerCase()}`));
+			updateModeCard(ctx, getMode()!);
 		}
+	}
+
+	function updateModeCard(ctx: ExtensionContext, mode: ModeDefinition) {
+		const t = ctx.ui.theme;
+		const lines: string[] = [];
+
+		// Header
+		lines.push(t.fg("accent", t.bold(mode.name.toUpperCase())) + t.fg("dim", " mode"));
+
+		// Restrictions summary
+		const parts: string[] = [];
+
+		if (mode.bash === "all") {
+			parts.push(t.fg("muted", "bash:") + t.fg("success", "all"));
+		} else if (mode.bash === "none") {
+			parts.push(t.fg("muted", "bash:") + t.fg("warning", "off"));
+		} else {
+			parts.push(t.fg("muted", "bash:") + t.fg("warning", "read-only"));
+		}
+
+		if (mode.editableExtensions) {
+			parts.push(t.fg("muted", "edit:") + t.fg("warning", mode.editableExtensions.join(" ")));
+		} else if (mode.tools !== "all" && Array.isArray(mode.tools) && !mode.tools.includes("edit")) {
+			parts.push(t.fg("muted", "edit:") + t.fg("error", "off"));
+		} else {
+			parts.push(t.fg("muted", "edit:") + t.fg("success", "all"));
+		}
+
+		if (mode.provider && mode.model) {
+			parts.push(t.fg("muted", "model:") + `${mode.provider}/${mode.model}`);
+		}
+
+		if (mode.thinkingLevel) {
+			parts.push(t.fg("muted", "think:") + mode.thinkingLevel);
+		}
+
+		lines.push(parts.join(t.fg("dim", " | ")));
+
+		ctx.ui.setWidget("agent-mode-card", lines);
 	}
 
 	// ------------------------------------------------------------------
