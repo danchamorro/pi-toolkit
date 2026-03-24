@@ -22,7 +22,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, ToolCallEventResult } from "@mariozechner/pi-coding-agent";
 import { DynamicBorder, getAgentDir, isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Container, Key, type SelectItem, SelectList, Text } from "@mariozechner/pi-tui";
 import { loadModes, type ModesConfig } from "./config.ts";
@@ -449,7 +449,7 @@ export default function agentModes(pi: ExtensionAPI) {
 	// Event: Enforce bash and file restrictions
 	// ------------------------------------------------------------------
 
-	pi.on("tool_call", async (event) => {
+	pi.on("tool_call", async (event): Promise<ToolCallEventResult | undefined> => {
 		const mode = getMode();
 		if (!mode) return;
 
