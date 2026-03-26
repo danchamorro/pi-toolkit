@@ -13,7 +13,7 @@
  *   Uses whichever model is currently selected in the session (ctx.model).
  */
 
-import { complete } from "@mariozechner/pi-ai";
+import { completeSimple } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { clean } from "./clean.ts";
 
@@ -78,10 +78,10 @@ async function enhanceText(
 	].join("\n");
 
 	try {
-		const response = await complete(
+		const response = await completeSimple(
 			model,
 			{
-				system: ENHANCER_SYSTEM,
+				systemPrompt: ENHANCER_SYSTEM,
 				messages: [
 					{
 						role: "user" as const,
@@ -90,7 +90,7 @@ async function enhanceText(
 					},
 				],
 			},
-			{ apiKey, reasoningEffort: "off" },
+			{ apiKey },
 		);
 
 		const enhanced = response.content
