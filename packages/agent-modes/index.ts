@@ -27,6 +27,8 @@ import type {
   ExtensionContext,
   ToolCallEventResult,
 } from "@mariozechner/pi-coding-agent";
+import type { Api, Model } from "@mariozechner/pi-ai";
+import type { ThinkingLevel } from "@mariozechner/pi-agent-core";
 import { DynamicBorder, getAgentDir, isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Container, Key, type SelectItem, SelectList, Text } from "@mariozechner/pi-tui";
 import { loadModes, type ModesConfig } from "./config.ts";
@@ -50,7 +52,7 @@ export default function agentModes(pi: ExtensionAPI) {
   // Baseline model/thinking state -- captured before entering a mode with
   // model or thinking overrides. Restored when switching to a non-overriding
   // mode or turning off.
-  let baseline: { model: unknown; thinkingLevel: unknown } | null = null;
+  let baseline: { model: Model<Api> | undefined; thinkingLevel: ThinkingLevel } | null = null;
 
   // ------------------------------------------------------------------
   // CLI flag
@@ -172,7 +174,7 @@ export default function agentModes(pi: ExtensionAPI) {
     if (activeMode === "off") {
       ctx.ui.setWidget("agent-mode-card", undefined);
     } else {
-      updateModeCard(ctx, getMode()!);
+      updateModeCard(ctx, modes[activeMode as ModeName]);
     }
   }
 
@@ -365,9 +367,9 @@ export default function agentModes(pi: ExtensionAPI) {
         // Parse "Name (provider/id)" -> provider, id
         const match = modelChoice.match(/\(([^/]+)\/(.+)\)$/);
         if (match) {
-          if (!config[name]) config[name] = {};
-          config[name]!.provider = match[1];
-          config[name]!.model = match[2];
+          const entry = config[name] ?? (config[name] = {});
+          entry.provider = match[1];
+          entry.model = match[2];
         }
       }
 
@@ -386,8 +388,8 @@ export default function agentModes(pi: ExtensionAPI) {
       }
 
       if (thinkingChoice !== NO_OVERRIDE_THINKING) {
-        if (!config[name]) config[name] = {};
-        config[name]!.thinkingLevel = thinkingChoice as (typeof THINKING_LEVELS)[number];
+        const entry = config[name] ?? (config[name] = {});
+        entry.thinkingLevel = thinkingChoice as (typeof THINKING_LEVELS)[number];
       }
     }
 
@@ -407,10 +409,11 @@ export default function agentModes(pi: ExtensionAPI) {
         existing[name] = { ...existing[name], ...config[name] };
       } else if (existing[name]) {
         // "No override" selected -- clear model/thinking assignments
-        delete existing[name]!.provider;
-        delete existing[name]!.model;
-        delete existing[name]!.thinkingLevel;
-        if (Object.keys(existing[name]!).length === 0) {
+        const entry = existing[name];
+        delete entry.provider;
+        delete entry.model;
+        delete entry.thinkingLevel;
+        if (Object.keys(entry).length === 0) {
           delete existing[name];
         }
       }
@@ -472,7 +475,7 @@ export default function agentModes(pi: ExtensionAPI) {
         const name = arg as ModeName;
         if (!MODE_NAMES.includes(name)) {
           ctx.ui.notify(
-            `Unknown mode "${args!.trim()}". Available: ${MODE_NAMES.join(", ")}, off, setup`,
+            `Unknown mode "${args.trim()}". Available: ${MODE_NAMES.join(", ")}, off, setup`,
             "error",
           );
           return;
@@ -527,8 +530,8 @@ export default function agentModes(pi: ExtensionAPI) {
         };
       }
       if (mode.bash === "restricted") {
-        const command = event.input.command;
-        if (!isSafeBash(command, activeMode)) {
+        const {command} = event.input;
+        if (!isSafeBash(command, activeMode as ModeName)) {
           return {
             block: true,
             reason: `${mode.name} mode: command blocked (not in allowlist). Switch to code mode for full access.\nCommand: ${command}`,
@@ -539,7 +542,7 @@ export default function agentModes(pi: ExtensionAPI) {
 
     // File edit restrictions
     if (isToolCallEventType("edit", event) && mode.editableExtensions) {
-      const path = event.input.path;
+      const {path} = event.input;
       if (!isEditableFile(path, mode)) {
         return {
           block: true,
@@ -550,7 +553,7 @@ export default function agentModes(pi: ExtensionAPI) {
 
     // File write restrictions
     if (isToolCallEventType("write", event) && mode.editableExtensions) {
-      const path = event.input.path;
+      const {path} = event.input;
       if (!isEditableFile(path, mode)) {
         return {
           block: true,
@@ -587,7 +590,7 @@ export default function agentModes(pi: ExtensionAPI) {
         (e: { type: string; customType?: string }) =>
           e.type === "custom" && e.customType === "agent-mode-state",
       )
-      .pop() as { data?: { mode: ModeName } } | undefined;
+      .pop() as { data?: { mode: ModeName | "off" } } | undefined;
 
     if (stateEntry?.data?.mode === "off") {
       await turnOff(ctx);

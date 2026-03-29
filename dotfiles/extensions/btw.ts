@@ -145,7 +145,7 @@ function buildSeedMessages(ctx: ExtensionContext, thread: BtwDetails[]): Message
 
 	try {
 		const contextMessages = buildSessionContext(ctx.sessionManager.getEntries(), ctx.sessionManager.getLeafId()).messages;
-		seed.push(...contextMessages);
+		seed.push(...(contextMessages as Message[]));
 	} catch {
 		// Ignore context seed failures and continue with an empty side thread.
 	}
@@ -194,6 +194,13 @@ function notify(ctx: ExtensionContext | ExtensionCommandContext, message: string
 	}
 }
 
+
+export function matchesBtwDismissKey(keybindings: KeybindingsManager, data: string): boolean {
+	const legacyKeybindings = keybindings as KeybindingsManager & {
+		matches(input: string, binding: "selectCancel"): boolean;
+	};
+	return keybindings.matches(data, "tui.select.cancel") || legacyKeybindings.matches(data, "selectCancel");
+}
 
 class BtwOverlay extends Container implements Focusable {
 	private readonly input: Input;
@@ -245,7 +252,7 @@ class BtwOverlay extends Container implements Focusable {
 	}
 
 	handleInput(data: string): void {
-		if (this.keybindings.matches(data, "selectCancel")) {
+		if (matchesBtwDismissKey(this.keybindings, data)) {
 			this.onDismissCallback();
 			return;
 		}
@@ -397,7 +404,7 @@ export default function (pi: ExtensionAPI) {
 	const mdTheme = getMarkdownTheme();
 
 	function getModelKey(ctx: ExtensionContext): string {
-		const model = ctx.model;
+		const {model} = ctx;
 		return model ? `${model.provider}/${model.id}` : "none";
 	}
 
@@ -800,7 +807,7 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	async function summarizeThread(ctx: ExtensionContext, items: BtwDetails[]): Promise<string> {
-		const model = ctx.model;
+		const {model} = ctx;
 		if (!model) {
 			throw new Error("No active model selected.");
 		}
@@ -883,7 +890,7 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	async function runBtwPrompt(ctx: ExtensionCommandContext, question: string): Promise<void> {
-		const model = ctx.model;
+		const {model} = ctx;
 		if (!model) {
 			setOverlayStatus("No active model selected.");
 			notify(ctx, "No active model selected.", "error");
