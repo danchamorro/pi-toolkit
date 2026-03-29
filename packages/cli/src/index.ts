@@ -5,6 +5,7 @@ import { defineCommand, runMain } from "citty";
 import { runInstall } from "./commands/install.ts";
 import { runList } from "./commands/list.ts";
 import { runStatus } from "./commands/status.ts";
+import { runSync } from "./commands/sync.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CLI_VERSION: string = JSON.parse(
@@ -93,6 +94,31 @@ const status = defineCommand({
   },
 });
 
+const sync = defineCommand({
+  meta: {
+    name: "sync",
+    description: "Absorb unmanaged extensions and skills from pi into the repo",
+  },
+  args: {
+    "repo-path": {
+      type: "string",
+      description: "Path to local pi-toolkit repo clone",
+      required: true,
+    },
+    all: {
+      type: "boolean",
+      description: "Absorb all unmanaged items without prompting",
+      default: false,
+    },
+  },
+  run({ args }) {
+    return runSync({
+      repoPath: args["repo-path"],
+      all: args.all,
+    });
+  },
+});
+
 const main = defineCommand({
   meta: {
     name: "pi-agent-toolkit",
@@ -104,6 +130,7 @@ const main = defineCommand({
     install,
     list,
     status,
+    sync,
   },
 });
 
