@@ -13,7 +13,7 @@ import {
   AGENTS_SKILLS_DIR,
 } from "../lib/paths.ts";
 
-type FileStatus = "ok" | "missing" | "not-installed";
+type FileStatus = "ok" | "missing" | "not-installed" | "untracked";
 
 interface StatusEntry {
   name: string;
@@ -118,7 +118,23 @@ export function runStatus(): void {
   for (const component of registry) {
     const isInstalled = installedNames.has(component.name);
 
+    const path = expectedPath(component);
+
     if (!isInstalled) {
+      // Not in manifest, but check filesystem in case it was installed
+      // before the CLI existed (e.g., via install.sh or manually)
+      if (path) {
+        const check = checkFile(path);
+        if (check.exists) {
+          entries.push({
+            name: component.name,
+            category: component.category,
+            status: "untracked",
+            detail: check.detail,
+          });
+          continue;
+        }
+      }
       entries.push({
         name: component.name,
         category: component.category,
@@ -127,7 +143,6 @@ export function runStatus(): void {
       continue;
     }
 
-    const path = expectedPath(component);
     if (!path) {
       // Can't verify on disk (e.g., pi packages)
       entries.push({
@@ -164,18 +179,27 @@ export function runStatus(): void {
     const catEntries = entries.filter((e) => e.category === cat.key);
     if (catEntries.length === 0) continue;
 
-    const installed = catEntries.filter((e) => e.status !== "not-installed");
+    const tracked = catEntries.filter((e) => e.status === "ok" || e.status === "missing");
+    const untracked = catEntries.filter((e) => e.status === "untracked");
     const available = catEntries.filter((e) => e.status === "not-installed");
+    const totalInstalled = tracked.length + untracked.length;
 
     console.log(
-      pc.bold(pc.cyan(cat.label)) + pc.dim(` (${installed.length}/${catEntries.length} installed)`),
+      pc.bold(pc.cyan(cat.label)) + pc.dim(` (${totalInstalled}/${catEntries.length} installed)`),
     );
 
-    for (const entry of installed) {
+    for (const entry of tracked) {
       const icon = entry.status === "ok" ? pc.green("*") : pc.red("!");
       const detail = entry.detail ? pc.dim(` (${entry.detail})`) : "";
       const statusLabel = entry.status === "missing" ? pc.red(" MISSING") : "";
       console.log(`  ${icon} ${entry.name}${statusLabel}${detail}`);
+    }
+
+    for (const entry of untracked) {
+      const detail = entry.detail ? pc.dim(` (${entry.detail})`) : "";
+      console.log(
+        `  ${pc.yellow("~")} ${entry.name}${detail} ${pc.yellow("(not tracked by manifest)")}`,
+      );
     }
 
     if (available.length > 0) {
