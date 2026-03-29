@@ -73,7 +73,7 @@ let repoExtDir: string;
 beforeEach(() => {
   testDir = join(
     tmpdir(),
-    `pi-toolkit-sync-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `pi-agent-toolkit-sync-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   piExtDir = join(testDir, "pi-extensions");
   repoExtDir = join(testDir, "repo-extensions");

@@ -9,9 +9,12 @@ let testDir: string;
 let manifestPath: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `pi-toolkit-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  testDir = join(
+    tmpdir(),
+    `pi-agent-toolkit-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(testDir, { recursive: true });
-  manifestPath = join(testDir, ".pi-toolkit.json");
+  manifestPath = join(testDir, ".pi-agent-toolkit.json");
 });
 
 afterEach(() => {
@@ -117,7 +120,7 @@ describe("writeManifest", () => {
   });
 
   it("creates parent directories if needed", () => {
-    const nested = join(testDir, "a", "b", ".pi-toolkit.json");
+    const nested = join(testDir, "a", "b", ".pi-agent-toolkit.json");
     const manifest: Manifest = {
       version: "1.0.0",
       installed: {

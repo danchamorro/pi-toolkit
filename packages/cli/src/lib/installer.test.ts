@@ -163,7 +163,7 @@ let testDir: string;
 beforeEach(() => {
   testDir = join(
     tmpdir(),
-    `pi-toolkit-installer-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `pi-agent-toolkit-installer-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   mkdirSync(testDir, { recursive: true });
 });

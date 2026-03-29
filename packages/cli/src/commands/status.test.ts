@@ -38,7 +38,7 @@ let testDir: string;
 beforeEach(() => {
   testDir = join(
     tmpdir(),
-    `pi-toolkit-status-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `pi-agent-toolkit-status-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   mkdirSync(testDir, { recursive: true });
 });

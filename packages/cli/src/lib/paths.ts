@@ -15,7 +15,7 @@ export const PI_AGENT_DIR = resolve(homedir(), ".pi", "agent");
 export const AGENTS_SKILLS_DIR = resolve(homedir(), ".agents", "skills");
 
 /** Manifest file path */
-export const MANIFEST_PATH = resolve(PI_AGENT_DIR, ".pi-toolkit.json");
+export const MANIFEST_PATH = resolve(PI_AGENT_DIR, ".pi-agent-toolkit.json");
 
 /** Pi agent extensions directory */
 export const PI_EXTENSIONS_DIR = resolve(PI_AGENT_DIR, "extensions");
