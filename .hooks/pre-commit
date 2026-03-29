@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ─────────────────────────────────────────────────────────────────────
+# Pre-commit hook: lint, format check, typecheck, test
+# ─────────────────────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+step() { echo -e "${CYAN}[pre-commit]${RESET} $*"; }
+pass() { echo -e "${GREEN}[pre-commit]${RESET} $*"; }
+fail() { echo -e "${RED}[pre-commit]${RESET} $*"; exit 1; }
+
+step "Running lint..."
+npx eslint packages/cli/ || fail "Lint failed. Run 'npm run lint:fix' to fix."
+pass "Lint passed."
+
+step "Checking formatting..."
+npx prettier --check packages/cli/ || fail "Format check failed. Run 'npm run format' to fix."
+pass "Formatting OK."
+
+step "Running typecheck..."
+npm run typecheck --workspace=packages/cli || fail "Typecheck failed."
+pass "Typecheck passed."
+
+step "Running tests..."
+npm run test --workspace=packages/cli || fail "Tests failed."
+pass "Tests passed."
+
+pass "All checks passed."

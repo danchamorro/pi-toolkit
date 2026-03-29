@@ -1,13 +1,11 @@
 # pi-toolkit
 
-My personal [Pi](https://github.com/badlogic/pi-mono) coding agent setup,
-combined with Pi packages I've built. This repo serves two purposes: it's
-my versioned backup so I can restore or sync my setup across machines, and
-it's a reference for anyone looking to customize their own Pi environment.
+A CLI to selectively install curated extensions, skills, and configs for
+the [Pi](https://github.com/badlogic/pi-mono) coding agent. Pick and
+choose what you want, or install everything at once.
 
-Includes installable npm packages, 22 extensions, 30 skills, MCP server
-configurations, and safety guardrails. Use all of it, fork it as a
-starting point, or cherry-pick the pieces you want.
+Includes 22 extensions, 30 skills, 2 installable npm packages, MCP server
+configurations, and safety guardrails.
 
 ---
 
@@ -130,54 +128,58 @@ Maintained by their original authors. Installed automatically by
 
 ---
 
-## How to use this
+## Quick start
 
-### Option 1: Just the packages
-
-Install packages directly without cloning:
+Interactive picker (choose what you want):
 
 ```bash
-pi install npm:@danchamorro/pi-agent-modes
-pi install npm:@danchamorro/pi-prompt-enhancer
+npx pi-agent-toolkit install
 ```
 
-### Option 2: Full setup
+Install everything:
 
-Clone and run the installer to get everything (extensions, skills, configs,
-MCP templates, safety guardrails):
+```bash
+npx pi-agent-toolkit install --all
+```
+
+Install specific components:
+
+```bash
+npx pi-agent-toolkit install --extensions "damage-control commit-approval exa-search-tool"
+npx pi-agent-toolkit install --skills "brainstorm systematic-debugging"
+npx pi-agent-toolkit install --packages "agent-modes prompt-enhancer"
+```
+
+Browse the full catalog:
+
+```bash
+npx pi-agent-toolkit list
+```
+
+Check what's installed:
+
+```bash
+npx pi-agent-toolkit status
+```
+
+### For contributors / personal setup
+
+If you clone the repo, you can symlink instead of copy so edits flow
+back to the repo:
 
 ```bash
 git clone https://github.com/danchamorro/pi-toolkit.git
-cd pi-toolkit/dotfiles
-./install.sh
+npx pi-agent-toolkit install --all --override-configs --link --repo-path ./pi-toolkit
 ```
 
-The installer:
+Or install globally for a persistent command:
 
-1. Symlinks extensions, configs, and bundled skills
-2. Installs 23 external skills via `npx skills add`
-3. Creates `auth.json` and `mcp.json` from templates (fill in your keys)
-4. Runs `npm install` for extensions with dependencies
-5. Installs the two npm packages
+```bash
+npm install -g pi-agent-toolkit
+pi-agent-toolkit install
+```
 
-To update after a pull: `./install.sh --update`
-
-If you fork this repo as your own setup, use `./install.sh --sync` to
-absorb new extensions or skills you built in pi back into the repo.
-
-See [dotfiles/SETUP.md](dotfiles/SETUP.md) for the full walkthrough.
-
-### Option 3: Cherry-pick
-
-Browse [`dotfiles/`](dotfiles/) and grab what you want:
-
-- Copy individual `.ts` extension files into `~/.pi/agent/extensions/`
-- Copy skill directories into `~/.pi/agent/skills/` or `~/.agents/skills/`
-- Use the external skill install commands from
-  [dotfiles/README.md](dotfiles/README.md)
-- Read the config files for patterns to adapt to your own setup
-
-See [dotfiles/README.md](dotfiles/README.md) for descriptions of every file.
+See [dotfiles/SETUP.md](dotfiles/SETUP.md) for detailed configuration.
 
 ---
 
