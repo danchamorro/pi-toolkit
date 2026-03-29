@@ -1,3 +1,12 @@
+/**
+ * BTW Side Chat Extension
+ *
+ * Adds a /btw command that opens an overlay side-chat panel for quick,
+ * focused questions without interrupting the main conversation. Supports
+ * multi-turn threaded dialogue, tool use in the side session, scroll
+ * navigation, and optional summary injection back into the main chat.
+ */
+
 import {
 	buildSessionContext,
 	codingTools,

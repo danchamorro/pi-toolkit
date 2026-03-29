@@ -1,3 +1,12 @@
+/**
+ * Question Mode Extension
+ *
+ * Toggleable read-only mode (Ctrl+Q or /question-mode) that restricts the
+ * agent to exploration-only tools (read, grep, find, search) and blocks
+ * file edits and bash commands. Useful for asking questions about a
+ * codebase without risking modifications.
+ */
+
 import type { ExtensionAPI, ExtensionContext, ToolCallEventResult } from "@mariozechner/pi-coding-agent";
 import { Key } from "@mariozechner/pi-tui";
 

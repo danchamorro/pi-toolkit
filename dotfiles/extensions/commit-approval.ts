@@ -1,3 +1,12 @@
+/**
+ * Commit Approval Extension
+ *
+ * Intercepts git commit commands (both agent tool calls and user bash) to
+ * validate the commit message against Conventional Commits standards and
+ * require interactive approval before the commit proceeds. Blocks commits
+ * with missing bodies or malformed subjects.
+ */
+
 import { basename } from "node:path";
 
 import type {

@@ -1,3 +1,12 @@
+/**
+ * PR Approval Extension
+ *
+ * Intercepts PR creation (gh pr create), PR merges (gh pr merge), and
+ * force/protected-branch pushes (git push) to validate metadata and
+ * require interactive approval before the operation proceeds. Blocks
+ * PRs with missing titles or bodies.
+ */
+
 import { basename } from "node:path";
 
 import type {

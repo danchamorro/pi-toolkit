@@ -1,3 +1,11 @@
+/**
+ * Require Session Name on Exit
+ *
+ * Ensures every session is named before closing. Prompts for a name on
+ * /safe-quit (or Ctrl+Shift+Q), and catches built-in /quit to auto-name
+ * unnamed sessions from the first user message with a timestamp fallback.
+ */
+
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
 function normalizeName(name: string | undefined | null): string {

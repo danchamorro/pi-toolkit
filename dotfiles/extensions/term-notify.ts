@@ -1,3 +1,12 @@
+/**
+ * Terminal Notify Extension
+ *
+ * Sends a desktop notification when the agent finishes a turn. Uses cmux
+ * native notifications with a visual flash when available, and falls back
+ * to OSC 777 (Ghostty, iTerm2, WezTerm) otherwise. Includes a preview of
+ * the last assistant message in the notification body.
+ */
+
 import { basename } from "node:path";
 import { execFile } from "node:child_process";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
