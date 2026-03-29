@@ -57,9 +57,9 @@ async function enhanceText(text: string, ctx: ExtensionContext): Promise<string 
     return null;
   }
 
-  const apiKey = await ctx.modelRegistry.getApiKey(model);
-  if (!apiKey) {
-    ctx.ui.notify(`No API key available for ${model.id}`, "error");
+  const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
+  if (!auth.ok) {
+    ctx.ui.notify(auth.error || `No API key available for ${model.id}`, "error");
     return null;
   }
 
@@ -87,7 +87,7 @@ async function enhanceText(text: string, ctx: ExtensionContext): Promise<string 
           },
         ],
       },
-      { apiKey },
+      { apiKey: auth.apiKey, headers: auth.headers, signal: ctx.signal },
     );
 
     const enhanced = response.content

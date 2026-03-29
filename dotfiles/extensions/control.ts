@@ -677,7 +677,7 @@ async function handleCommand(
 			const response = await complete(
 				model,
 				{ systemPrompt: SUMMARIZATION_SYSTEM_PROMPT, messages: [userMessage] },
-				{ apiKey: auth.apiKey, headers: auth.headers },
+				{ apiKey: auth.apiKey, headers: auth.headers, signal: ctx.signal },
 			);
 
 			if (response.stopReason === "aborted" || response.stopReason === "error") {

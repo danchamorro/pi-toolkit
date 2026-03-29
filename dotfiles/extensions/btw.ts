@@ -97,7 +97,6 @@ function createBtwResourceLoader(ctx: ExtensionContext, appendSystemPrompt: stri
 		getAgentsFiles: () => ({ agentsFiles: [] }),
 		getSystemPrompt: () => systemPrompt,
 		getAppendSystemPrompt: () => appendSystemPrompt,
-		getPathMetadata: () => new Map(),
 		extendResources: () => {},
 		reload: async () => {},
 	};
