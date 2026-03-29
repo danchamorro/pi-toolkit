@@ -3,15 +3,33 @@ import {
   getByCategory,
   getExtensionGroups,
   GROUP_LABELS,
+  type ComponentCategory,
   type ExtensionGroup,
 } from "../lib/registry.ts";
+
+/** Print a section of components if any exist */
+function printSection(category: ComponentCategory, title: string, subtitle?: string): void {
+  const items = getByCategory(category);
+  if (items.length === 0) return;
+
+  const header = subtitle
+    ? pc.bold(pc.cyan(title)) + pc.dim(` (${subtitle})`)
+    : pc.bold(pc.cyan(title));
+  console.log(header);
+
+  for (const c of items) {
+    const suffix = c.remote ? pc.dim(` [${c.remote}]`) : "";
+    console.log(`  ${pc.green(c.name.padEnd(38))} ${pc.dim(c.description)}${suffix}`);
+  }
+  console.log();
+}
 
 export function runList(): void {
   console.log();
   console.log(pc.bold("pi-agent-toolkit: available components"));
   console.log();
 
-  // Extensions (grouped)
+  // Extensions get special grouped display
   console.log(pc.bold(pc.cyan("Extensions")));
   const groups = getExtensionGroups();
 
@@ -26,44 +44,12 @@ export function runList(): void {
   }
   console.log();
 
-  // Bundled skills
-  const bundled = getByCategory("skills-bundled");
-  if (bundled.length > 0) {
-    console.log(pc.bold(pc.cyan("Bundled Skills")));
-    for (const c of bundled) {
-      console.log(`  ${pc.green(c.name.padEnd(38))} ${pc.dim(c.description)}`);
-    }
-    console.log();
-  }
-
-  // External skills
-  const external = getByCategory("skills-external");
-  if (external.length > 0) {
-    console.log(pc.bold(pc.cyan("External Skills")) + pc.dim(" (installed from source repos)"));
-    for (const c of external) {
-      const source = c.remote ? pc.dim(` [${c.remote}]`) : "";
-      console.log(`  ${pc.green(c.name.padEnd(38))} ${pc.dim(c.description)}${source}`);
-    }
-    console.log();
-  }
-
-  // Packages
-  const pkgs = getByCategory("packages");
-  if (pkgs.length > 0) {
-    console.log(pc.bold(pc.cyan("Packages")) + pc.dim(" (installed via pi install)"));
-    for (const c of pkgs) {
-      console.log(`  ${pc.green(c.name.padEnd(38))} ${pc.dim(c.description)}`);
-    }
-    console.log();
-  }
-
-  // Configs
-  const configs = getByCategory("configs");
-  if (configs.length > 0) {
-    console.log(pc.bold(pc.cyan("Starter Configs")) + pc.dim(" (copied as templates)"));
-    for (const c of configs) {
-      console.log(`  ${pc.green(c.name.padEnd(38))} ${pc.dim(c.description)}`);
-    }
-    console.log();
-  }
+  // All other categories use the standard section format
+  printSection("skills-bundled", "Bundled Skills");
+  printSection("skills-external", "External Skills", "installed from source repos");
+  printSection("prompts", "Prompts", "custom prompt templates");
+  printSection("agents", "Agents", "custom agent definitions");
+  printSection("themes", "Themes", "TUI color themes");
+  printSection("packages", "Packages", "installed via pi install");
+  printSection("configs", "Starter Configs", "copied as templates");
 }

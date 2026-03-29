@@ -12,7 +12,14 @@ import {
 import { resolve } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { PI_EXTENSIONS_DIR, PI_SKILLS_DIR, AGENTS_SKILLS_DIR } from "../lib/paths.ts";
+import {
+  PI_EXTENSIONS_DIR,
+  PI_SKILLS_DIR,
+  PI_PROMPTS_DIR,
+  PI_AGENTS_DIR,
+  PI_THEMES_DIR,
+  AGENTS_SKILLS_DIR,
+} from "../lib/paths.ts";
 import { getByCategory } from "../lib/registry.ts";
 
 interface SyncOptions {
@@ -132,59 +139,43 @@ export async function runSync(options: SyncOptions): Promise<void> {
   }
 
   p.log.info(`Repo: ${repoPath}`);
-  p.log.info("Scanning for unmanaged extensions and skills...");
+  p.log.info("Scanning for unmanaged components...");
 
   const externalSkills = getExternalSkillNames();
 
-  // Build the list of known names from the repo (already managed)
-  const knownExtensions = new Set<string>();
-  const extDir = resolve(dotfilesPath, "extensions");
-  if (existsSync(extDir)) {
-    for (const entry of readdirSync(extDir)) {
-      knownExtensions.add(entry);
-    }
+  /** Read known names from a dotfiles subdirectory */
+  function knownNames(subdir: string): Set<string> {
+    const dir = resolve(dotfilesPath, subdir);
+    if (!existsSync(dir)) return new Set();
+    return new Set(readdirSync(dir));
   }
 
-  const knownAgentSkills = new Set<string>();
-  const agentSkillsDir = resolve(dotfilesPath, "agent-skills");
-  if (existsSync(agentSkillsDir)) {
-    for (const entry of readdirSync(agentSkillsDir)) {
-      knownAgentSkills.add(entry);
-    }
-  }
-
-  const knownGlobalSkills = new Set<string>();
-  const globalSkillsDir = resolve(dotfilesPath, "global-skills");
-  if (existsSync(globalSkillsDir)) {
-    for (const entry of readdirSync(globalSkillsDir)) {
-      knownGlobalSkills.add(entry);
-    }
-  }
-
-  // Scan for unmanaged items
-  const found: FoundItem[] = [
-    ...findUnmanaged(
-      PI_EXTENSIONS_DIR,
-      resolve(dotfilesPath, "extensions"),
-      "extensions",
-      knownExtensions,
-    ),
-    ...findUnmanaged(
+  // Define all scan targets: [piDir, dotfilesSubdir, label, extraSkipNames]
+  const scanTargets: [string, string, string, Set<string>][] = [
+    [PI_EXTENSIONS_DIR, "extensions", "extensions", knownNames("extensions")],
+    [
       PI_SKILLS_DIR,
-      resolve(dotfilesPath, "agent-skills"),
       "agent-skills",
-      new Set([...knownAgentSkills, ...externalSkills]),
-    ),
-    ...findUnmanaged(
+      "agent-skills",
+      new Set([...knownNames("agent-skills"), ...externalSkills]),
+    ],
+    [
       AGENTS_SKILLS_DIR,
-      resolve(dotfilesPath, "global-skills"),
       "global-skills",
-      new Set([...knownGlobalSkills, ...externalSkills]),
-    ),
+      "global-skills",
+      new Set([...knownNames("global-skills"), ...externalSkills]),
+    ],
+    [PI_PROMPTS_DIR, "prompts", "prompts", knownNames("prompts")],
+    [PI_AGENTS_DIR, "agents", "agents", knownNames("agents")],
+    [PI_THEMES_DIR, "themes", "themes", knownNames("themes")],
   ];
 
+  const found: FoundItem[] = scanTargets.flatMap(([scanDir, dotfilesSub, category, skipNames]) =>
+    findUnmanaged(scanDir, resolve(dotfilesPath, dotfilesSub), category, skipNames),
+  );
+
   if (found.length === 0) {
-    p.log.success("No unmanaged extensions or skills found. Everything is in sync.");
+    p.log.success("No unmanaged components found. Everything is in sync.");
     p.outro("Done.");
     return;
   }

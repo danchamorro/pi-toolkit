@@ -10,6 +10,9 @@ export interface Manifest {
       bundled: string[];
       external: string[];
     };
+    prompts: string[];
+    agents: string[];
+    themes: string[];
     packages: string[];
     configs: string[];
   };
@@ -23,6 +26,9 @@ function emptyManifest(): Manifest {
     installed: {
       extensions: [],
       skills: { bundled: [], external: [] },
+      prompts: [],
+      agents: [],
+      themes: [],
       packages: [],
       configs: [],
     },
@@ -50,6 +56,9 @@ export function readManifest(path: string = MANIFEST_PATH): Manifest {
           bundled: installed.skills?.bundled ?? defaults.installed.skills.bundled,
           external: installed.skills?.external ?? defaults.installed.skills.external,
         },
+        prompts: installed.prompts ?? defaults.installed.prompts,
+        agents: installed.agents ?? defaults.installed.agents,
+        themes: installed.themes ?? defaults.installed.themes,
         packages: installed.packages ?? defaults.installed.packages,
         configs: installed.configs ?? defaults.installed.configs,
       },
@@ -78,6 +87,12 @@ function getList(manifest: Manifest, category: string): string[] | null {
       return manifest.installed.skills.external;
     case "packages":
       return manifest.installed.packages;
+    case "prompts":
+      return manifest.installed.prompts;
+    case "agents":
+      return manifest.installed.agents;
+    case "themes":
+      return manifest.installed.themes;
     case "configs":
       return manifest.installed.configs;
     default:

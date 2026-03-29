@@ -25,6 +25,9 @@ describe("readManifest", () => {
     assert.deepEqual(manifest.installed.extensions, []);
     assert.deepEqual(manifest.installed.skills.bundled, []);
     assert.deepEqual(manifest.installed.skills.external, []);
+    assert.deepEqual(manifest.installed.prompts, []);
+    assert.deepEqual(manifest.installed.agents, []);
+    assert.deepEqual(manifest.installed.themes, []);
     assert.deepEqual(manifest.installed.packages, []);
     assert.deepEqual(manifest.installed.configs, []);
     assert.equal(manifest.installedAt, "");
@@ -37,6 +40,9 @@ describe("readManifest", () => {
       installed: {
         extensions: ["tilldone"],
         skills: { bundled: ["brainstorm"], external: ["docx"] },
+        prompts: [],
+        agents: [],
+        themes: [],
         packages: ["agent-modes"],
         configs: ["AGENTS.md"],
       },
@@ -74,6 +80,9 @@ describe("readManifest", () => {
     assert.deepEqual(manifest.installed.extensions, ["loop"]);
     assert.deepEqual(manifest.installed.skills.bundled, []);
     assert.deepEqual(manifest.installed.skills.external, []);
+    assert.deepEqual(manifest.installed.prompts, []);
+    assert.deepEqual(manifest.installed.agents, []);
+    assert.deepEqual(manifest.installed.themes, []);
     assert.deepEqual(manifest.installed.packages, []);
     assert.deepEqual(manifest.installed.configs, []);
     assert.equal(manifest.installedAt, "");
@@ -87,6 +96,9 @@ describe("writeManifest", () => {
       installed: {
         extensions: ["tilldone"],
         skills: { bundled: [], external: [] },
+        prompts: [],
+        agents: [],
+        themes: [],
         packages: [],
         configs: [],
       },
@@ -111,6 +123,9 @@ describe("writeManifest", () => {
       installed: {
         extensions: [],
         skills: { bundled: [], external: [] },
+        prompts: [],
+        agents: [],
+        themes: [],
         packages: [],
         configs: [],
       },
@@ -162,6 +177,27 @@ describe("recordInstall", () => {
 
     const manifest = readManifest(manifestPath);
     assert.deepEqual(manifest.installed.configs, ["AGENTS.md"]);
+  });
+
+  it("records prompts", () => {
+    recordInstall(["my-prompt"], "prompts", "1.0.0", manifestPath);
+
+    const manifest = readManifest(manifestPath);
+    assert.deepEqual(manifest.installed.prompts, ["my-prompt"]);
+  });
+
+  it("records agents", () => {
+    recordInstall(["my-agent"], "agents", "1.0.0", manifestPath);
+
+    const manifest = readManifest(manifestPath);
+    assert.deepEqual(manifest.installed.agents, ["my-agent"]);
+  });
+
+  it("records themes", () => {
+    recordInstall(["dark-pro"], "themes", "1.0.0", manifestPath);
+
+    const manifest = readManifest(manifestPath);
+    assert.deepEqual(manifest.installed.themes, ["dark-pro"]);
   });
 
   it("does not duplicate names on repeated calls", () => {

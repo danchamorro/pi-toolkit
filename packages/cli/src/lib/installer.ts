@@ -17,6 +17,9 @@ import {
   PI_AGENT_DIR,
   PI_EXTENSIONS_DIR,
   PI_SKILLS_DIR,
+  PI_PROMPTS_DIR,
+  PI_AGENTS_DIR,
+  PI_THEMES_DIR,
   AGENTS_SKILLS_DIR,
 } from "./paths.ts";
 import { recordInstall } from "./manifest.ts";
@@ -55,6 +58,16 @@ export function resolveTarget(component: Component): string {
         return resolve(AGENTS_SKILLS_DIR, component.name);
       }
       return resolve(PI_SKILLS_DIR, component.name);
+    }
+    case "prompts":
+      return resolve(PI_PROMPTS_DIR, component.name);
+    case "agents":
+      return resolve(PI_AGENTS_DIR, component.name);
+    case "themes": {
+      const themeName = (component.source ?? component.name).endsWith(".json")
+        ? basename(component.source ?? component.name)
+        : component.name + ".json";
+      return resolve(PI_THEMES_DIR, themeName);
     }
     case "configs": {
       // Template files: auth.json.template -> auth.json, mcp.json.template -> mcp.json
@@ -172,10 +185,17 @@ export async function installComponents(
   if (components.length === 0) return;
 
   // Ensure base directories exist
-  mkdirSync(PI_AGENT_DIR, { recursive: true });
-  mkdirSync(PI_EXTENSIONS_DIR, { recursive: true });
-  mkdirSync(PI_SKILLS_DIR, { recursive: true });
-  mkdirSync(AGENTS_SKILLS_DIR, { recursive: true });
+  for (const dir of [
+    PI_AGENT_DIR,
+    PI_EXTENSIONS_DIR,
+    PI_SKILLS_DIR,
+    PI_PROMPTS_DIR,
+    PI_AGENTS_DIR,
+    PI_THEMES_DIR,
+    AGENTS_SKILLS_DIR,
+  ]) {
+    mkdirSync(dir, { recursive: true });
+  }
 
   const spinner = p.spinner();
   const results: { name: string; success: boolean; message: string }[] = [];

@@ -15,17 +15,22 @@ interface InstallArgs {
   version: string;
 }
 
+const SELECT_ALL = "__all__";
+
 /** Prompt a multiselect and handle cancellation. Returns selected names. */
 async function selectComponents(message: string, components: Component[]): Promise<string[]> {
   if (components.length === 0) return [];
 
   const result = await p.multiselect({
     message,
-    options: components.map((c) => ({
-      value: c.name,
-      label: c.name,
-      hint: c.description,
-    })),
+    options: [
+      { value: SELECT_ALL, label: "* Select all", hint: `all ${components.length} items` },
+      ...components.map((c) => ({
+        value: c.name,
+        label: c.name,
+        hint: c.description,
+      })),
+    ],
     required: false,
   });
 
@@ -34,7 +39,11 @@ async function selectComponents(message: string, components: Component[]): Promi
     process.exit(0);
   }
 
-  return result as string[];
+  const selected = result as string[];
+  if (selected.includes(SELECT_ALL)) {
+    return components.map((c) => c.name);
+  }
+  return selected;
 }
 
 /** Run the interactive step-by-step picker */
@@ -48,6 +57,9 @@ async function interactivePicker(): Promise<Component[]> {
       message: "Select external skills to install (fetched from source repos):",
       components: getByCategory("skills-external"),
     },
+    { message: "Select prompts to install:", components: getByCategory("prompts") },
+    { message: "Select agents to install:", components: getByCategory("agents") },
+    { message: "Select themes to install:", components: getByCategory("themes") },
     { message: "Select pi packages to install:", components: getByCategory("packages") },
     {
       message: "Select starter configs (copied as templates, won't overwrite existing):",
@@ -120,6 +132,9 @@ export async function runInstall(args: InstallArgs): Promise<void> {
   const counts: [string, number][] = [
     ["extension", components.filter((c) => c.category === "extensions").length],
     ["skill", components.filter((c) => c.category.startsWith("skills-")).length],
+    ["prompt", components.filter((c) => c.category === "prompts").length],
+    ["agent", components.filter((c) => c.category === "agents").length],
+    ["theme", components.filter((c) => c.category === "themes").length],
     ["package", components.filter((c) => c.category === "packages").length],
     ["config", components.filter((c) => c.category === "configs").length],
   ];

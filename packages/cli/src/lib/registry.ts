@@ -3,7 +3,10 @@ export type ComponentCategory =
   | "skills-bundled"
   | "skills-external"
   | "packages"
-  | "configs";
+  | "configs"
+  | "prompts"
+  | "agents"
+  | "themes";
 
 export type InstallMethod = "copy" | "symlink" | "skills-cli" | "pi-install";
 
@@ -593,6 +596,9 @@ export const registry: Component[] = [
   ...externalSkills,
   ...packages,
   ...configs,
+
+  // Placeholders: no items yet, but the categories are ready for content.
+  // Add prompts, agents, and themes entries here as they're created.
 ];
 
 /** Get components by category */

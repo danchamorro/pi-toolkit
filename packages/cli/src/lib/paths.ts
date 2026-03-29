@@ -22,3 +22,12 @@ export const PI_EXTENSIONS_DIR = resolve(PI_AGENT_DIR, "extensions");
 
 /** Pi agent skills directory */
 export const PI_SKILLS_DIR = resolve(PI_AGENT_DIR, "skills");
+
+/** Pi agent prompts directory */
+export const PI_PROMPTS_DIR = resolve(PI_AGENT_DIR, "prompts");
+
+/** Pi agent agents directory */
+export const PI_AGENTS_DIR = resolve(PI_AGENT_DIR, "agents");
+
+/** Pi agent themes directory */
+export const PI_THEMES_DIR = resolve(PI_AGENT_DIR, "themes");

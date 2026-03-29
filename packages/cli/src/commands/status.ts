@@ -3,7 +3,15 @@ import { resolve, basename } from "node:path";
 import pc from "picocolors";
 import { readManifest } from "../lib/manifest.ts";
 import { registry, type Component } from "../lib/registry.ts";
-import { PI_AGENT_DIR, PI_EXTENSIONS_DIR, PI_SKILLS_DIR, AGENTS_SKILLS_DIR } from "../lib/paths.ts";
+import {
+  PI_AGENT_DIR,
+  PI_EXTENSIONS_DIR,
+  PI_SKILLS_DIR,
+  PI_PROMPTS_DIR,
+  PI_AGENTS_DIR,
+  PI_THEMES_DIR,
+  AGENTS_SKILLS_DIR,
+} from "../lib/paths.ts";
 
 type FileStatus = "ok" | "missing" | "not-installed";
 
@@ -35,6 +43,16 @@ function expectedPath(component: Component): string | null {
       // Check both locations, prefer whichever exists
       if (existsSync(piPath)) return piPath;
       return agentsPath;
+    }
+    case "prompts":
+      return resolve(PI_PROMPTS_DIR, component.name);
+    case "agents":
+      return resolve(PI_AGENTS_DIR, component.name);
+    case "themes": {
+      const themeName = (component.source ?? component.name).endsWith(".json")
+        ? basename(component.source ?? component.name)
+        : component.name + ".json";
+      return resolve(PI_THEMES_DIR, themeName);
     }
     case "packages":
       return null; // Can't easily check pi packages on disk
@@ -88,6 +106,9 @@ export function runStatus(): void {
     ...manifest.installed.extensions,
     ...manifest.installed.skills.bundled,
     ...manifest.installed.skills.external,
+    ...manifest.installed.prompts,
+    ...manifest.installed.agents,
+    ...manifest.installed.themes,
     ...manifest.installed.packages,
     ...manifest.installed.configs,
   ]);
@@ -132,6 +153,9 @@ export function runStatus(): void {
     { key: "extensions", label: "Extensions" },
     { key: "skills-bundled", label: "Bundled Skills" },
     { key: "skills-external", label: "External Skills" },
+    { key: "prompts", label: "Prompts" },
+    { key: "agents", label: "Agents" },
+    { key: "themes", label: "Themes" },
     { key: "packages", label: "Packages" },
     { key: "configs", label: "Configs" },
   ];
