@@ -249,6 +249,15 @@ const bundledSkills: Component[] = [
     isDirectory: true,
   },
   {
+    name: "code-review",
+    category: "skills-bundled",
+    description: "AI-powered code review using CodeRabbit CLI",
+    method: "copy",
+    source: "global-skills/code-review",
+    target: "global-skills",
+    isDirectory: true,
+  },
+  {
     name: "cli-detector",
     category: "skills-bundled",
     description: "Scan repos for service integrations and their CLIs",

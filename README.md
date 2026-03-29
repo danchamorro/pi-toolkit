@@ -90,6 +90,7 @@ safety patterns.
 |-------|-------------|
 | `brainstorm` | Interview-driven plan stress-testing |
 | `cli-detector` | Scan repos for service integrations and their CLIs |
+| `code-review` | AI-powered code review using CodeRabbit CLI |
 | `exa-search` | Semantic web search via Exa API |
 | `gh-issue-creator` | Create GitHub issues via `gh` CLI |
 | `google-chat-cards-v2` | Google Chat Cards v2 notifications |
