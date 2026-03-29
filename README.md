@@ -169,21 +169,20 @@ Check what's installed:
 pi-agent-toolkit status
 ```
 
-### For contributors / personal setup
-
-If you clone the repo, you can symlink instead of copy so edits flow
-back to the repo:
+Update the CLI to the latest version:
 
 ```bash
-git clone https://github.com/danchamorro/pi-toolkit.git
-pi-agent-toolkit install --all --override-configs --link --repo-path ./pi-toolkit
+pi-agent-toolkit update
 ```
 
-Or install globally for a persistent command:
+### For contributors / personal setup
+
+Clone the repo and symlink so edits flow back:
 
 ```bash
-npm install -g pi-agent-toolkit
-pi-agent-toolkit install
+git clone https://github.com/danchamorro/pi-agent-toolkit.git
+cd pi-agent-toolkit
+pi-agent-toolkit install --all --override-configs --link --repo-path .
 ```
 
 See [dotfiles/SETUP.md](dotfiles/SETUP.md) for detailed configuration.

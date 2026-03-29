@@ -1,6 +1,6 @@
 # Setup Guide
 
-Full walkthrough for setting up the pi-toolkit dotfiles.
+Full walkthrough for setting up pi-agent-toolkit.
 
 ## Prerequisites
 
@@ -27,39 +27,64 @@ Full walkthrough for setting up the pi-toolkit dotfiles.
 
 ## Installation
 
-### 1. Clone the repo
+### For users (recommended)
+
+Install the CLI globally and use the interactive picker:
 
 ```bash
-git clone https://github.com/danchamorro/pi-toolkit.git
-cd pi-toolkit
+npm install -g pi-agent-toolkit
+pi-agent-toolkit install
 ```
 
-### 2. Run the installer
+Or install everything at once:
 
 ```bash
-cd dotfiles
-./install.sh
+pi-agent-toolkit install --all
 ```
 
-The installer will:
+Install specific components by category:
 
-1. Check prerequisites
-2. Symlink config files into `~/.pi/agent/`
-3. Symlink extensions into `~/.pi/agent/extensions/`
-4. Symlink `intercepted-commands/` into `~/.pi/agent/`
-5. Symlink bundled skills into `~/.pi/agent/skills/` and `~/.agents/skills/`
-6. Install 23 external skills from their source repos via `npx skills add`
-7. Create `auth.json` and `mcp.json` from templates (first run only)
-8. Run `npm install` in extensions with dependencies
-9. Install pi packages (`@danchamorro/pi-agent-modes`,
-   `@danchamorro/pi-prompt-enhancer`)
+```bash
+pi-agent-toolkit install --extensions "damage-control commit-approval exa-search-tool"
+pi-agent-toolkit install --skills "brainstorm systematic-debugging"
+pi-agent-toolkit install --packages "agent-modes prompt-enhancer"
+```
 
-If any target file already exists, the installer will prompt you
-interactively before overwriting.
+### For contributors / personal setup
 
-### 3. Configure secrets
+Clone the repo and symlink so edits flow back:
 
-#### API keys (`auth.json`)
+```bash
+git clone https://github.com/danchamorro/pi-agent-toolkit.git
+cd pi-agent-toolkit
+pi-agent-toolkit install --all --override-configs --link --repo-path .
+```
+
+### Managing your setup
+
+```bash
+pi-agent-toolkit status    # See what's installed and detect drift
+pi-agent-toolkit list      # Browse all available components
+pi-agent-toolkit update    # Update the CLI to the latest version
+```
+
+### Syncing new work (contributors only)
+
+When pi creates a new extension or skill in `~/.pi/agent/`, absorb it
+into the repo:
+
+```bash
+pi-agent-toolkit sync --repo-path ~/path/to/pi-agent-toolkit
+```
+
+This copies the new file into `dotfiles/`, replaces the original with a
+symlink, and prompts you to add it to the registry.
+
+---
+
+## Post-install Configuration
+
+### API keys (`auth.json`)
 
 Edit `~/.pi/agent/auth.json` with your provider API keys:
 
@@ -71,7 +96,7 @@ Edit `~/.pi/agent/auth.json` with your provider API keys:
 }
 ```
 
-#### MCP servers (`mcp.json`)
+### MCP servers (`mcp.json`)
 
 Edit `~/.pi/agent/mcp.json` to configure your MCP servers. The template
 includes a skeleton for:
@@ -82,7 +107,7 @@ includes a skeleton for:
 
 See the [MCP Server Setup](#mcp-server-setup) section below for details.
 
-#### Exa API key
+### Exa API key
 
 If you use the `exa-search` skill, add your API key:
 
@@ -176,75 +201,6 @@ Install as a Pi package (not an MCP server):
 ```bash
 pi install npm:pi-mcp-adapter
 ```
-
-**Note**: A PR has been submitted upstream for collapsible response output.
-If merged, the standard install works. Otherwise, you can install from the
-fork.
-
----
-
-## Installer Modes
-
-The installer has three modes:
-
-### First-time setup (no flags)
-
-```bash
-./install.sh
-```
-
-Full interactive setup. Symlinks everything, installs external skills,
-creates secret files from templates, installs npm dependencies and pi
-packages. Prompts before overwriting any existing files.
-
-### Update (after a pull)
-
-```bash
-./install.sh --update
-```
-
-Use after `git pull` to pick up changes:
-
-- Creates symlinks for any new files added to the repo
-- Reinstalls external skills (idempotent, updates if already present)
-- Runs `npm install` in extension dirs (picks up dependency changes)
-- Skips secret template setup (won't overwrite your keys)
-- Warns about dangling symlinks (files removed from repo)
-
-```bash
-cd pi-toolkit
-git pull
-cd dotfiles
-./install.sh --update
-```
-
-### Sync (absorb new work into the repo)
-
-```bash
-./install.sh --sync
-```
-
-Use when you've built a new extension or skill directly in pi (e.g., pi
-created `~/.pi/agent/extensions/my-new-thing.ts`) and you want to pull it
-into the repo so it's tracked and versioned.
-
-The sync scans `~/.pi/agent/extensions/` and `~/.pi/agent/skills/` for
-files that are **not** symlinks (i.e., not already managed by the repo).
-For each one found, it prompts:
-
-```
-Found new extension: my-new-thing.ts
-Move to repo and symlink back? [y/N]
-```
-
-If you say yes, it copies the file into `dotfiles/`, replaces the original
-with a symlink back to the repo, and you can then commit the change.
-
-External skills (installed via the skills CLI) are automatically skipped.
-
-**Note**: This mode is for repo maintainers and anyone who has forked the
-repo as their own setup. If you cloned the repo just to use it, build your
-own extensions separately or fork first.
 
 ---
 

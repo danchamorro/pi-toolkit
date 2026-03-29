@@ -17,7 +17,7 @@
   "author": "Daniel Chamorro",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danchamorro/pi-toolkit",
+    "url": "https://github.com/danchamorro/pi-agent-toolkit",
     "directory": "packages/agent-modes"
   },
   "type": "module",
