@@ -22,7 +22,7 @@ async function selectComponents(message: string, components: Component[]): Promi
   if (components.length === 0) return [];
 
   const result = await p.multiselect({
-    message,
+    message: `${message} ${pc.dim("(space = toggle, enter = confirm, enter with none = skip)")}`,
     options: [
       { value: SELECT_ALL, label: "* Select all", hint: `all ${components.length} items` },
       ...components.map((c) => ({
