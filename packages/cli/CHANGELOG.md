@@ -5,6 +5,15 @@ All notable changes to `pi-agent-toolkit` will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project uses [Semantic Versioning](https://semver.org/).
 
+## [0.5.8] - 2026-04-01
+
+### Changed
+
+- Cleaned up `status` command output: symlink target paths are now hidden
+  for healthy items (only shown for dangling/missing symlinks), dates use
+  relative format ("3d ago") instead of raw ISO timestamps, and untracked
+  labels are shortened from "not tracked by manifest" to "untracked".
+
 ## [0.5.7] - 2026-04-01
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "pi-agent-toolkit",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "CLI to selectively install curated extensions, skills, and configs for the pi coding agent",
   "keywords": [
     "pi",

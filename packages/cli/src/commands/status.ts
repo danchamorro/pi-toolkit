@@ -82,6 +82,36 @@ function checkFile(path: string): { exists: boolean; detail?: string } {
   }
 }
 
+function formatDate(iso: string | undefined): string {
+  if (!iso) return "unknown";
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return iso;
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+
+  let relative: string;
+  if (diffDay > 30) {
+    relative = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } else if (diffDay >= 1) {
+    relative = `${diffDay}d ago`;
+  } else if (diffHr >= 1) {
+    relative = `${diffHr}h ago`;
+  } else if (diffMin >= 1) {
+    relative = `${diffMin}m ago`;
+  } else {
+    relative = "just now";
+  }
+  return relative;
+}
+
 export function runStatus(): void {
   const manifest = readManifest();
 
@@ -96,9 +126,9 @@ export function runStatus(): void {
     return;
   }
 
-  console.log(`${pc.dim("CLI version:")}  ${manifest.version || "unknown"}`);
-  console.log(`${pc.dim("Installed at:")} ${manifest.installedAt}`);
-  console.log(`${pc.dim("Updated at:")}   ${manifest.updatedAt}`);
+  console.log(`  ${pc.dim("Version:")}   ${manifest.version || "unknown"}`);
+  console.log(`  ${pc.dim("Installed:")} ${formatDate(manifest.installedAt)}`);
+  console.log(`  ${pc.dim("Updated:")}   ${formatDate(manifest.updatedAt)}`);
   console.log();
 
   // Collect all installed names from manifest
@@ -190,16 +220,16 @@ export function runStatus(): void {
 
     for (const entry of tracked) {
       const icon = entry.status === "ok" ? pc.green("*") : pc.red("!");
-      const detail = entry.detail ? pc.dim(` (${entry.detail})`) : "";
+      // Only show detail for problematic states (missing, dangling symlinks)
+      const showDetail =
+        entry.status === "missing" || (entry.detail?.startsWith("dangling") ?? false);
+      const detail = showDetail && entry.detail ? pc.dim(` (${entry.detail})`) : "";
       const statusLabel = entry.status === "missing" ? pc.red(" MISSING") : "";
       console.log(`  ${icon} ${entry.name}${statusLabel}${detail}`);
     }
 
     for (const entry of untracked) {
-      const detail = entry.detail ? pc.dim(` (${entry.detail})`) : "";
-      console.log(
-        `  ${pc.yellow("~")} ${entry.name}${detail} ${pc.yellow("(not tracked by manifest)")}`,
-      );
+      console.log(`  ${pc.yellow("~")} ${entry.name} ${pc.yellow("(untracked)")}`);
     }
 
     if (available.length > 0) {
