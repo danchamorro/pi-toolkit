@@ -150,6 +150,14 @@ Before every commit, scan changes for artifacts. If `git diff` shows `console.lo
 - When inspection is allowed, keep it tightly scoped to the smallest possible set of named files and never run broad recursive searches over `node_modules/`.
 - **Exception — Pi packages:** Reading files under `@mariozechner/` is always allowed without permission. This namespace contains Pi and its related packages (docs, examples, extensions, themes, skills, SDK source).
 
+### Pi toolkit repo awareness
+
+- Treat `~/Documents/Personal/Code/my-projects/pi-agent-toolkit` as the user's personal and public Pi setup repository.
+- This repo is where the user saves reusable skills, Pi-related features, and setup changes so they can be shared publicly and used as a backup of their Pi environment.
+- When the user asks to create or update Pi skills, Pi features, Pi configuration, or reusable agent tooling, consider this repo a preferred destination when it is relevant.
+- Keep changes in this repo polished and shareable. Avoid adding secrets, private tokens, machine-specific credentials, or undocumented local-only assumptions.
+- If a requested change seems specific to one machine or not suitable for a public repo, call that out and ask before adding it here.
+
 ### Default workflow
 
 1. Make requested edits.

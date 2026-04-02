@@ -530,7 +530,7 @@ export default function agentModes(pi: ExtensionAPI) {
         };
       }
       if (mode.bash === "restricted") {
-        const {command} = event.input;
+        const { command } = event.input;
         if (!isSafeBash(command, activeMode as ModeName)) {
           return {
             block: true,
@@ -542,7 +542,7 @@ export default function agentModes(pi: ExtensionAPI) {
 
     // File edit restrictions
     if (isToolCallEventType("edit", event) && mode.editableExtensions) {
-      const {path} = event.input;
+      const { path } = event.input;
       if (!isEditableFile(path, mode)) {
         return {
           block: true,
@@ -553,7 +553,7 @@ export default function agentModes(pi: ExtensionAPI) {
 
     // File write restrictions
     if (isToolCallEventType("write", event) && mode.editableExtensions) {
-      const {path} = event.input;
+      const { path } = event.input;
       if (!isEditableFile(path, mode)) {
         return {
           block: true,

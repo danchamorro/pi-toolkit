@@ -2,6 +2,43 @@
 
 All notable changes to extensions in `~/.pi/agent/extensions/`.
 
+## 2026-04-01
+
+### coach.ts
+
+- Added `/coach last` to reopen the most recent saved coach report in the
+  current session. Coach reports are now persisted as hidden session state
+  after generation so they can be reopened without rerunning analysis.
+- Fixed coaching prompt so label recommendations are framed as solutions
+  to navigation problems, not as standalone rituals. The coach now surfaces
+  `/tree` (with labels) only when a session is long enough that finding
+  key decisions is a real issue.
+- Added a new `/coach` command that analyzes the current session plus recent
+  sessions for the current working directory and recommends underused PI
+  workflows.
+- The first coaching heuristics focus on session-oriented features: `/resume`,
+  `pi -c`, `/tree`, `/fork`, `/compact`, `/name`, and checkpoint labels inside
+  `/tree`.
+- Added a lightweight coaching report UI plus local-only usage summaries so the
+  extension can explain why each recommendation was made.
+- Improved `/coach` with an interactive scope picker so it can analyze either
+  the current session only or all sessions in the current working directory.
+- Restyled the coaching report with themed section headers, highlighted
+  recommendations, and colorized metadata so the view is easier to scan than
+  plain white text.
+- Rebuilt `/coach` as an LLM-powered deep analysis tool. It now opens every
+  session file in the selected scope, parses assistant tool calls to extract
+  file access patterns, extracts actual user messages and assistant snippets,
+  computes cross-session file overlap, then sends the full evidence bundle to
+  the active model for genuine coaching analysis. The output is rendered as
+  formatted Markdown with specific, evidence-backed recommendations including
+  quoted user messages, named files, and concrete suggestions for skills or
+  extensions to build. Quality over speed.
+
+### execute-command (removed)
+
+- Removed the execute-command extension. Will be rebuilt later.
+
 ## 2026-03-31
 
 ### btw.ts, control.ts, loop.ts, question-mode.ts, review.ts, tilldone.ts, tools.ts

@@ -62,6 +62,7 @@ are reflected immediately.
 | `control.ts` | Session control and summarization |
 | `loop.ts` | Loop execution with breakout conditions |
 | `context.ts` | TUI showing loaded extensions, skills, token usage |
+| `coach.ts` | Recommends underused PI workflows like /resume, /tree, /fork, and /compact based on recent session habits |
 | `files.ts` | File picker with quick actions (reveal, open, edit, diff) |
 | `review.ts` | Code review: PR review, branch diffs, uncommitted changes |
 | `session-breakdown.ts` | Session cost/usage analytics with calendar heatmap |
@@ -70,7 +71,6 @@ are reflected immediately.
 | `qna-interactive.ts` | Structured Q&A mode |
 | `question-mode.ts` | Read-only question mode (no file changes) |
 | `require-session-name-on-exit.ts` | Prompts for session name before exit |
-| `execute-command/` | Slash command execution |
 | `uv.ts` | Intercepts pip/python calls and redirects to uv |
 
 ### MCP Servers
