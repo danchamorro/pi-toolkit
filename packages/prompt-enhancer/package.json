@@ -1,6 +1,6 @@
 {
   "name": "@danchamorro/pi-prompt-enhancer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Enhance prompts to be clearer, more specific, and more actionable before sending",
   "keywords": [
     "pi-package",
@@ -17,7 +17,7 @@
   "author": "Daniel Chamorro",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danchamorro/pi-agent-toolkit",
+    "url": "git+https://github.com/danchamorro/pi-agent-toolkit.git",
     "directory": "packages/prompt-enhancer"
   },
   "type": "module",

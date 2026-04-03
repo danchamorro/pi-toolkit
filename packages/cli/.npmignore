@@ -1,4 +1,6 @@
 src/
+*.test.ts
 tsconfig.json
 tsup.config.ts
+node_modules/
 *.tgz

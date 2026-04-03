@@ -6,6 +6,13 @@ in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.5] - 2026-04-03
+
+### Fixed
+
+- Normalized repository metadata to npm's preferred git URL format so
+  publishes do not emit repository auto-correction warnings.
+
 ## [1.0.4] - 2026-03-29
 
 ### Fixed

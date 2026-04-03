@@ -1,6 +1,6 @@
 {
   "name": "pi-agent-toolkit",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "CLI to selectively install curated extensions, skills, and configs for the pi coding agent",
   "keywords": [
     "pi",
@@ -14,7 +14,7 @@
   "author": "Daniel Chamorro",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danchamorro/pi-agent-toolkit.git",
+    "url": "git+https://github.com/danchamorro/pi-agent-toolkit.git",
     "directory": "packages/cli"
   },
   "type": "module",

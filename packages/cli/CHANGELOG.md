@@ -5,6 +5,16 @@ All notable changes to `pi-agent-toolkit` will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project uses [Semantic Versioning](https://semver.org/).
 
+## [0.6.1] - 2026-04-03
+
+### Fixed
+
+- Normalized repository metadata to npm's preferred git URL format so
+  package publishes no longer emit repository auto-correction warnings.
+- Added explicit `.npmignore` files to the bundled dotfiles package paths
+  that participate in CLI packaging, which removes npm's gitignore fallback
+  warning during `npm pack` and `npm publish`.
+
 ## [0.6.0] - 2026-04-03
 
 ### Added
