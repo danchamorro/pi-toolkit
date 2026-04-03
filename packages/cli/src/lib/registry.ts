@@ -205,6 +205,14 @@ const extensions: Component[] = [
     method: "copy",
     source: "extensions/require-session-name-on-exit.ts",
   },
+  {
+    name: "clean-sessions",
+    category: "extensions",
+    group: "workflow",
+    description: "Prunes old, low-value session files into trash",
+    method: "copy",
+    source: "extensions/clean-sessions.ts",
+  },
 
   // Tools
   {

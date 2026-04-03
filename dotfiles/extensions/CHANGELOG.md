@@ -2,6 +2,19 @@
 
 All notable changes to extensions in `~/.pi/agent/extensions/`.
 
+## 2026-04-03
+
+### clean-sessions.ts
+
+- Added a new `clean-sessions` extension with `/clean-sessions [days]` to find
+  old, low-value session files, preview the cleanup set, and move confirmed
+  matches into `~/.pi/agent/sessions/.trash/` instead of deleting them.
+- Added `/empty-session-trash` to permanently remove trashed session files
+  after a second exact-count confirmation step.
+- The cleanup flow preserves manually named sessions, skips the `.trash`
+  subtree while scanning, and keeps original directory structure inside trash
+  so sessions can be restored manually if needed.
+
 ## 2026-04-01
 
 ### coach.ts

@@ -8,7 +8,7 @@ extensions, skills, config files, and safety guardrails.
 ```
 dotfiles/
   Config files ........ AGENTS.md, APPEND_SYSTEM.md, settings.json, etc.
-  extensions/ ......... 20 single-file + 2 directory-based extensions
+  extensions/ ......... 21 single-file + 2 directory-based extensions
   intercepted-commands/ Python/pip shims (uv.ts dependency)
   agent-skills/ ....... Pi-specific skills  (-> ~/.pi/agent/skills/)
   global-skills/ ...... Agent-agnostic skills (-> ~/.agents/skills/)
@@ -78,6 +78,7 @@ All 9 extensions are now self-contained in this repo (no upstream package refere
 | `qna-interactive.ts` | Interactive Q&A mode with structured question/answer flow. |
 | `question-mode.ts` | Question-only mode that restricts the agent to asking questions. |
 | `require-session-name-on-exit.ts` | Prompts for a session name before exiting Pi. |
+| `clean-sessions.ts` | Prunes old, low-value session files into `~/.pi/agent/sessions/.trash/`, with `/empty-session-trash` for permanent cleanup. |
 | `tilldone.ts` | Task list management with progress tracking. |
 | `tools.ts` | Custom tool registrations. |
 
