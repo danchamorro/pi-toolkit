@@ -41,6 +41,15 @@ When instructions in this file conflict with project-level AGENTS.md rules, this
   values, log text), non-code files (config, JSON, YAML, markdown), and files
   outside the indexed repository.
 
+## Preferred CLI tools
+
+- **ripgrep** (`rg`) is installed. Prefer over `grep` for searching file contents. Faster, respects `.gitignore`, and has sane defaults. Example: `rg "pattern"` instead of `grep -r "pattern"`.
+- **fd** is installed. Prefer over `find` for locating files by name or pattern. Simpler syntax, faster, respects `.gitignore`. Example: `fd "filename"` instead of `find . -name "filename"`.
+- **sd** is installed. Prefer over `sed` for find-and-replace in files. No escaping headaches. Example: `sd 'old' 'new' file.txt` instead of `sed -i '' 's/old/new/g' file.txt`.
+- **jq** is installed. Use for JSON processing in shell pipelines. Example: `curl -s api/endpoint | jq '.data[]'` to extract fields from JSON responses.
+- **yq** is installed. Use for YAML processing with the same syntax as jq. Example: `yq '.services.web.ports' docker-compose.yml` to query YAML configs.
+- **gh** is installed. Use for all GitHub operations (PRs, issues, workflows, API calls). Example: `gh pr create`, `gh run list`, `gh api`.
+
 ## Documentation lookups
 
 - When giving advice about library/framework APIs, state your confidence
@@ -64,6 +73,10 @@ When instructions in this file conflict with project-level AGENTS.md rules, this
 
 - Never use em dashes (--) in responses, written content, or any text the user may copy and paste.
 - Use alternatives instead: commas, parentheses, colons, semicolons, or separate sentences.
+
+## Web search date bias
+
+- When searching for year-specific recommendations (e.g., "best CLI tools of YYYY", "top libraries in YYYY"), always derive the year from the `Current date` field in the session context. Do not default to the last year of training data. LLMs tend to anchor on their training cutoff year; override that instinct and use the actual current year.
 
 ## External data preference
 
